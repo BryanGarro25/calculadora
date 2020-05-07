@@ -42,9 +42,13 @@
     <Button
         android:id="@+id/button8"
         android:text="4" />
+
     <Button
         android:id="@+id/button9"
+        android:layout_row="0"
+        android:layout_column="5"
         android:text="5" />
+
     <Button
         android:id="@+id/button10"
         android:text="6" />
