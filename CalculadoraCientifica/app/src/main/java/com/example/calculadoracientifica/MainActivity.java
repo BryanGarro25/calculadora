@@ -11,12 +11,14 @@ import android.widget.Toast;
 
 import com.example.calculadoracientifica.Logic.Evaluador;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener  {
     private String operacion ="";
     private List<Button> botones;
+    private TextView result_text;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Button button3 = findViewById(R.id.tres_btn);
         this.botones.add(button3);
         Button button4 = findViewById(R.id.cuatro_btn);
+
         this.botones.add(button4);
         Button button5 = findViewById(R.id.cinco_btn);
         this.botones.add(button5);
@@ -48,6 +51,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.botones.add(button_sen);
         Button button_cos = findViewById(R.id.coseno_btn);
         this.botones.add(button_cos);
+        Button button_sec = findViewById(R.id.secante_btn);
+        this.botones.add(button_sec);
+        Button button_csc = findViewById(R.id.cosecante_btn);
+        this.botones.add(button_csc);
+        Button button_ctg = findViewById(R.id.CTG_btn);
+        this.botones.add(button_ctg);
         Button button_pot = findViewById(R.id.e_btn);
         this.botones.add(button_pot);
         Button button_suma = findViewById(R.id.suma_btn);
@@ -74,11 +83,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.botones.add(button_off);
         Button button_equal= findViewById(R.id.resultado_btn);
         this.botones.add(button_equal);
-        TextView result_text = findViewById(R.id.textView);
+        Button button_signos= findViewById(R.id.Signos_btn);
+        this.botones.add(button_signos);
+        Button button_punto= findViewById(R.id.coma_btn);
+        this.botones.add(button_punto);
+        result_text = findViewById(R.id.textView);
+
+
         for (Button button : this.botones) {
             button.setOnClickListener(this);
         }
-
     }
     @Override
     public void onClick(View v) {
@@ -117,10 +131,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 expression("tan(");
                 break;
             case R.id.seno_btn:
-                expression("sen(");
+                expression("sin(");
                 break;
             case R.id.coseno_btn:
                 expression("cos(");
+                break;
+            case R.id.CTG_btn:
+                expression("ctg(");
+                break;
+            case R.id.secante_btn:
+                expression("sec(");
+                break;
+            case R.id.cosecante_btn:
+                expression("csc(");
                 break;
             case R.id.e_btn:
                 expression("^");
@@ -153,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 reset_operacion();
                 break;
             case R.id.porcentaje_btn:
-                expression("%");
+              porcentaje();
                 break;
             case R.id.salir_btn:
                 closeApp();
@@ -161,35 +184,76 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.resultado_btn:
                 evaluate();
                 break;
+            case R.id.Signos_btn:
+                expression("-");
+                break;
+            case R.id.coma_btn:
+                expression(".");
+                break;
 
 
         }
     }
+
     private  void  closeApp(){
         finish();
         System.exit(0);
     }
     public void expression(String char_to_add){
         this.operacion += char_to_add;
+        this.result_text.setText(this.operacion);
         Toast.makeText(this, this.operacion, Toast.LENGTH_SHORT).show();
     }
     public void evaluate(){
+        try{
+            double result = Evaluador.eval(this.operacion);
+            Toast.makeText(this, this.operacion, Toast.LENGTH_SHORT).show();
+            this.result_text.setText(Double.toString(result));
+        }catch(RuntimeException ex){
+            this.operacion = "";
+            this.result_text.setText("Syntax Error");
+        }
 
-        double result = Evaluador.eval(this.operacion);
-        TextView result_text = findViewById(R.id.textView);
-        result_text.setText(Double.toString(result));
 
     }
     public void reset_operacion(){
         this.operacion = "";
+        this.result_text.setText(this.operacion);
     }
     public void delete_last(){
         this.operacion = last(this.operacion);
+        this.result_text.setText(this.operacion);
     }
     private String last(String str) {
         if (str != null && str.length() > 0) {
             str = str.substring(0, str.length() - 1);
         }
         return str;
+    }
+        private void porcentaje(){
+        String last_number = "";
+
+        Toast.makeText(this, last_number, Toast.LENGTH_SHORT).show();
+        try {
+             for(int i = this.operacion.length()-1; i>=0 ; i--){
+                 Boolean flag = Character.isDigit(operacion.charAt(i));
+                 if(flag || operacion.charAt(i) == '.') {
+                     last_number = last_number + operacion.charAt(i);
+                 }
+                 else
+                    break;
+             }
+             String builder = new StringBuilder(last_number).reverse().toString();
+             String aux = this.operacion.replace(builder, "");
+             this.operacion = aux;
+             double toParse = Double.parseDouble(builder);
+             double result = toParse / 100;
+             String converted_result =   BigDecimal.valueOf(result).toPlainString();
+             this.operacion += converted_result;
+             this.result_text.setText(this.operacion);
+        } catch (Exception ex){
+            this.result_text.setText("Syntax Error");
+        }
+
     }
 }
